@@ -1,0 +1,89 @@
+/*
+  Squarespace — Variant Swatches  v1.0
+  Square Design Lab
+*/
+
+.sdl-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sdl-swatch-gap, 8px);
+  margin: 0.6em 0 0;
+}
+
+.sdl-swatches--grid {
+  margin-top: 0.5em;
+}
+
+.sdl-swatches--product {
+  margin: 0.2em 0 0.8em;
+}
+
+.sdl-swatch {
+  width: var(--sdl-swatch-size, 26px);
+  height: var(--sdl-swatch-size, 26px);
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background-color: #eee;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  position: relative;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 2px transparent;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  line-height: 1;
+  font-size: calc(var(--sdl-swatch-size, 26px) * 0.42);
+  color: #555;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Shapes */
+.sdl-shape-circle .sdl-swatch { border-radius: 50%; }
+.sdl-shape-rounded .sdl-swatch { border-radius: 6px; }
+.sdl-shape-square .sdl-swatch { border-radius: 0; }
+
+/* States */
+.sdl-swatch:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25);
+}
+
+.sdl-swatch.is-active {
+  box-shadow: 0 0 0 2px #111;
+}
+
+/* Unconfigured value — make it obvious it needs a hex/image. */
+.sdl-swatch--unset {
+  background: repeating-linear-gradient(
+    45deg, #f4f4f4, #f4f4f4 4px, #e2e2e2 4px, #e2e2e2 8px
+  );
+  font-weight: 600;
+}
+
+/* Image swatches keep a subtle frame so light images stay visible. */
+.sdl-swatch--image {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Active value label next to the option title (PDP). */
+.sdl-swatch-active-label {
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 0.4em;
+}
+
+/* Hide only the native <select> for the swatch option (the option title and
+   the swatches stay visible). */
+select.sdl-native-hidden {
+  display: none !important;
+}
+
+/* On the grid, suppress Squarespace's own hover-image swap while we drive it. */
+.product-list-item.sdl-swapped img.grid-image-hover {
+  opacity: 0 !important;
+}
