@@ -27,8 +27,12 @@
     gap: 8,                  // space between swatches in px
     applyToGrid: true,       // show swatches on the store/category grid
     applyToProduct: true,    // show swatches on the product detail page
-    hideNativeSelect: true,  // hide the native <select> for the swatch option on the PDP
+    hideNativeSelect: true,  // PDP: hide the native dropdown for the swatch option
+    hideGridDropdown: true,  // grid: hide the native quick-add dropdown for the swatch option
     showLabel: false,        // PDP: show the active value next to the option title
+    activeBorderWidth: 2,    // active swatch ring thickness in px
+    activeBorderColor: '#111111', // active swatch ring colour
+    activeRadius: 50,        // active swatch corner radius in px (high = pill/circle, 0 = square)
     colors: {}               // REQUIRED: { Navy: {hex:'#1b2a4a'} | {image:'https://…'} , … }
   };
 
@@ -118,6 +122,9 @@
     wrap.className = 'sdl-swatches sdl-shape-' + CONFIG.shape;
     wrap.style.setProperty('--sdl-swatch-size', CONFIG.size + 'px');
     wrap.style.setProperty('--sdl-swatch-gap', CONFIG.gap + 'px');
+    wrap.style.setProperty('--sdl-active-bw', CONFIG.activeBorderWidth + 'px');
+    wrap.style.setProperty('--sdl-active-bc', CONFIG.activeBorderColor);
+    wrap.style.setProperty('--sdl-active-radius', CONFIG.activeRadius + 'px');
     return wrap;
   }
 
@@ -213,6 +220,8 @@
           setActive(container, btn);
           tile.dataset.sdlCommitted = entry.assetUrl || '';
           swapGridImage(tile, entry.assetUrl);
+          // Keep the (hidden) quick-add dropdown in sync so Add to Cart works.
+          selectNativeValue(tile, CONFIG.swatchOption, entry.value);
         }
 
         if (hoverEnabled) {
@@ -235,8 +244,25 @@
         });
       }
 
-      const meta = tile.querySelector('.product-list-item-meta') || tile;
-      meta.appendChild(container);
+      // Place the swatches on their own line directly under the price. The
+      // title/price block is a vertical column, so appending into it drops the
+      // swatches beneath the price (rather than beside it in the meta row).
+      const titlePrice = tile.querySelector('.product-list-title-price');
+      if (titlePrice) {
+        titlePrice.appendChild(container);
+      } else {
+        (tile.querySelector('.product-list-item-meta') || tile).appendChild(container);
+      }
+
+      // Hide the native quick-add dropdown for the swatch option — the swatch
+      // now drives it. (Other options, e.g. Size, are left untouched.)
+      if (CONFIG.hideGridDropdown) {
+        const gridSelect = tile.querySelector(
+          '.product-list-item-add-to-cart select[name="variant-option-' + CONFIG.swatchOption + '-select"]');
+        const gridOptionWrap = gridSelect && gridSelect.closest('.variant-option');
+        if (gridOptionWrap) gridOptionWrap.classList.add('sdl-native-hidden');
+      }
+
       tile.dataset.sdlSwatch = 'true';
     });
   }
@@ -269,9 +295,10 @@
   }
 
   // Reflect the choice in the native <select> so price / stock / add-to-cart
-  // stay correct, then let Squarespace react.
-  function selectNativeValue(optionName, value) {
-    const sel = document.querySelector('select[name="variant-option-' + optionName + '-select"]');
+  // stay correct, then let Squarespace react. `root` scopes the lookup (the
+  // tile on the grid, or the document on the product page).
+  function selectNativeValue(root, optionName, value) {
+    const sel = root.querySelector('select[name="variant-option-' + optionName + '-select"]');
     if (!sel) return;
     const opt = Array.from(sel.options).find(function (o) {
       return o.textContent.trim() === value || o.value === value;
@@ -313,7 +340,7 @@
       function commit() {
         setActive(container, btn);
         committedUrl = entry.assetUrl || null;
-        selectNativeValue(optionName, entry.value);
+        selectNativeValue(document, optionName, entry.value);
         if (entry.assetUrl) activateGalleryImage(entry.assetUrl);
         if (labelEl) labelEl.textContent = entry.value;
       }
@@ -334,10 +361,12 @@
       });
     }
 
-    // Insert swatches just before the native select (keeping the option
-    // title visible), then optionally hide only the <select> itself.
-    select.parentElement.insertBefore(container, select);
-    if (CONFIG.hideNativeSelect) select.classList.add('sdl-native-hidden');
+    // Insert the swatches outside Squarespace's dropdown wrapper (which carries
+    // the border + chevron) so they sit cleanly under the option title, then
+    // hide that entire wrapper.
+    const dropdownWrap = select.closest('.variant-select-wrapper') || select.parentElement;
+    dropdownWrap.parentElement.insertBefore(container, dropdownWrap);
+    if (CONFIG.hideNativeSelect) dropdownWrap.classList.add('sdl-native-hidden');
 
     detail.dataset.sdlSwatch = 'true';
   }
