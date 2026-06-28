@@ -118,6 +118,15 @@
   input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
   input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 
+  /* "applies to" callout for the option name field */
+  .option-field {
+    background: #F4F6FF; border: 1px solid #DCE3FF; border-radius: var(--radius-md);
+    padding: 12px; margin-bottom: 14px;
+  }
+  .option-field label { color: #2c3a8c; }
+  .option-field.image-tone { background: #FFF6F0; border-color: #FFE0CC; }
+  .option-field.image-tone label { color: #9a4a18; }
+
   /* Value rows */
   .values-list { display: flex; flex-direction: column; gap: 10px; }
   .value-row {
@@ -133,7 +142,6 @@
   .value-row .del:hover { border-color: #e0a0a0; color: #c0392b; }
   .value-row .vinput { display: flex; gap: 8px; align-items: center; }
   .value-row .vinput .vhex { flex: 1; }
-  .value-row .vtype { width: 120px; flex-shrink: 0; }
   .add-value-btn {
     margin-top: 10px; width: 100%; height: 38px; border: 1px dashed var(--border-hover);
     background: #fff; color: var(--text-secondary); border-radius: var(--radius-sm); cursor: pointer;
@@ -180,17 +188,18 @@
   .pv-pdp-meta { flex: 1; min-width: 220px; }
   .pv-pdp-meta .pdp-h { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
   .pv-pdp-meta .pdp-price { color: #777; margin-bottom: 18px; }
-  .opt-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #888; margin-bottom: 8px; }
-  .opt-title .active-label { text-transform: none; letter-spacing: 0; color: #555; margin-left: 6px; font-weight: 500; }
+  .pv-opt-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #888; margin: 14px 0 8px; }
+  .pv-opt-title:first-child { margin-top: 0; }
+  .pv-opt-title .active-label { text-transform: none; letter-spacing: 0; color: #555; margin-left: 6px; font-weight: 500; }
+  .pv-swatch-block { margin-bottom: 6px; }
 
   /* swatches (mirror swatches.css) */
-  .sdl-swatches { display: flex; gap: var(--sdl-swatch-gap, 8px); align-items: center; margin: 0; }
-  .sdl-swatches--grid { flex-wrap: nowrap; }
+  .sdl-swatches { display: flex; gap: var(--sdl-swatch-gap, 8px); align-items: center; margin: 0; flex-wrap: wrap; }
   .sdl-swatch {
     width: var(--sdl-swatch-size, 26px); height: var(--sdl-swatch-size, 26px); padding: 0;
     border: 1px solid rgba(0,0,0,.15); background-size: cover; background-position: center;
     cursor: pointer; flex: 0 0 auto; box-shadow: 0 0 0 2px transparent;
-    transition: box-shadow .15s, transform .15s; display: inline-flex; align-items: center;
+    transition: transform .15s; display: inline-flex; align-items: center;
     justify-content: center; font-size: calc(var(--sdl-swatch-size,26px)*.42); color: #555;
   }
   .sdl-shape-circle .sdl-swatch { border-radius: 50%; }
@@ -233,37 +242,51 @@
     <span class="brand-icon">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg>
     </span>
-    <h2>Variant Swatches <span class="badge">v1.1</span></h2>
+    <h2>Variant Swatches <span class="badge">v1.2</span></h2>
   </div>
   <div class="sidebar-content">
 
-    <!-- Swatch option -->
+    <!-- Swatch type -->
     <div class="group open">
-      <div class="group-header" onclick="togGroup(this)">Variant Option</div>
+      <div class="group-header" onclick="togGroup(this)">Swatch Type</div>
       <div class="group-body">
         <div class="control-row">
-          <label>Option to turn into swatches</label>
-          <input type="text" id="swatchOption" value="Color">
-          <div class="helper-text">Must match the variant option name in Squarespace exactly (e.g. Color). Products without it stay native.</div>
+          <label>What should the swatches show?</label>
+          <select id="mode">
+            <option value="color">Color only</option>
+            <option value="image">Image only</option>
+            <option value="both">Both — colour for one option, image for another</option>
+          </select>
+          <div class="helper-text" id="modeHelp"></div>
         </div>
       </div>
     </div>
 
-    <!-- Swatch values -->
-    <div class="group open">
-      <div class="group-header" onclick="togGroup(this)">Swatch Values</div>
+    <!-- Color swatch option -->
+    <div class="group open" id="colorGroup">
+      <div class="group-header" onclick="togGroup(this)">Color Swatch</div>
       <div class="group-body">
-        <div class="control-row">
-          <label>Swatch type</label>
-          <select id="mode">
-            <option value="color">Color only (hex)</option>
-            <option value="image">Image only (URL)</option>
-            <option value="both">Both — choose per value</option>
-          </select>
-          <div class="helper-text" id="modeHelp">Each value shows a hex colour picker.</div>
+        <div class="option-field">
+          <label>Variant option for colour swatches</label>
+          <input type="text" id="colorOption" value="Color">
+          <div class="helper-text">The Squarespace variant option name (e.g. Color). Each value below gets a hex colour.</div>
         </div>
-        <div class="values-list" id="valuesList"></div>
-        <button class="add-value-btn" id="addValue">+ Add value</button>
+        <div class="values-list" id="colorValues"></div>
+        <button class="add-value-btn" data-list="color">+ Add colour value</button>
+      </div>
+    </div>
+
+    <!-- Image swatch option -->
+    <div class="group open" id="imageGroup">
+      <div class="group-header" onclick="togGroup(this)">Image Swatch</div>
+      <div class="group-body">
+        <div class="option-field image-tone">
+          <label>Variant option for image swatches</label>
+          <input type="text" id="imageOption" value="Size">
+          <div class="helper-text">A <strong>different</strong> variant option (e.g. Size or Material). Each value below gets an image URL.</div>
+        </div>
+        <div class="values-list" id="imageValues"></div>
+        <button class="add-value-btn" data-list="image">+ Add image value</button>
       </div>
     </div>
 
@@ -355,7 +378,6 @@
         <div class="pv-pdp-meta">
           <div class="pdp-h">The Ember Vessel</div>
           <div class="pdp-price">$200</div>
-          <div class="opt-title"><span id="pvOptName">Color</span><span class="active-label" id="pvActiveLabel"></span></div>
           <div id="pvPdpSwatches"></div>
         </div>
       </div>
@@ -365,28 +387,33 @@
   <div class="code-drawer">
     <div class="drawer-header">
       <h3>Code — paste into Settings → Advanced → Code Injection → Footer</h3>
-      <span class="drawer-hint">jsdelivr CDN</span>
+      <span class="drawer-hint">Cloudflare Pages CDN</span>
     </div>
     <pre id="codeOutput"></pre>
   </div>
 </div>
 
 <script>
-const CDN_BASE = 'https://cdn.jsdelivr.net/gh/square-design-lab/variant-swatch@main';
+const CDN_BASE = 'https://variant-swatch.pages.dev';
 
 const state = {
-  swatchOption: 'Color',
-  mode: 'color',
+  mode: 'color',                 // 'color' | 'image' | 'both'
+  colorOption: 'Color',
+  imageOption: 'Size',
+  colorValues: [
+    { name: 'Navy',   hex: '#1b2a4a' },
+    { name: 'White',  hex: '#f1efe9' },
+    { name: 'Black',  hex: '#141414' },
+    { name: 'Blue',   hex: '#2f6fed' },
+    { name: 'Orange', hex: '#e8772e' }
+  ],
+  imageValues: [
+    { name: 'Small',  image: '' },
+    { name: 'Medium', image: '' }
+  ],
   shape: 'circle', size: 28, gap: 9, trigger: 'hover',
   activeBorderWidth: 2, activeBorderColor: '#111111', activeRadius: 50,
-  applyToGrid: true, applyToProduct: true, hideGridDropdown: true, hideNativeSelect: true, showLabel: true,
-  values: [
-    { name: 'Navy',   type: 'color', hex: '#1b2a4a', image: '' },
-    { name: 'White',  type: 'color', hex: '#f1efe9', image: '' },
-    { name: 'Black',  type: 'color', hex: '#141414', image: '' },
-    { name: 'Blue',   type: 'color', hex: '#2f6fed', image: '' },
-    { name: 'Orange', type: 'color', hex: '#e8772e', image: '' }
-  ]
+  applyToGrid: true, applyToProduct: true, hideGridDropdown: true, hideNativeSelect: true, showLabel: true
 };
 
 /* ---- simple controls ---- */
@@ -399,7 +426,8 @@ function wireSeg(id,key){
 }
 wireSeg('shape','shape'); wireSeg('trigger','trigger');
 
-document.getElementById('swatchOption').addEventListener('input',e=>{state.swatchOption=e.target.value; render();});
+document.getElementById('colorOption').addEventListener('input',e=>{state.colorOption=e.target.value; render();});
+document.getElementById('imageOption').addEventListener('input',e=>{state.imageOption=e.target.value; render();});
 ['size','gap','activeBorderWidth','activeRadius'].forEach(id=>{
   document.getElementById(id).addEventListener('input',e=>{state[id]=+e.target.value; render();});
 });
@@ -411,125 +439,141 @@ acTxt.addEventListener('input',e=>{state.activeBorderColor=e.target.value; if(/^
 });
 
 const modeHelps = {
-  color: 'Each value shows a hex colour picker.',
-  image: 'Each value shows an image URL field.',
-  both: 'Pick per value whether it is a colour (hex) or an image (URL).'
+  color: 'One variant option becomes colour swatches (a hex colour per value).',
+  image: 'One variant option becomes image swatches (an image URL per value).',
+  both:  'Two DIFFERENT variant options: one shows colour swatches, the other shows image swatches.'
 };
-document.getElementById('mode').addEventListener('change',e=>{
-  state.mode=e.target.value;
-  document.getElementById('modeHelp').textContent=modeHelps[state.mode];
-  renderValues(); render();
-});
+document.getElementById('mode').addEventListener('change',e=>{ state.mode=e.target.value; render(); });
+
+function applyMode(){
+  const showColor = state.mode==='color' || state.mode==='both';
+  const showImage = state.mode==='image' || state.mode==='both';
+  document.getElementById('colorGroup').style.display = showColor ? '' : 'none';
+  document.getElementById('imageGroup').style.display = showImage ? '' : 'none';
+  document.getElementById('modeHelp').textContent = modeHelps[state.mode];
+}
 
 /* ---- value rows ---- */
 function escAttr(s){ return String(s==null?'':s).replace(/"/g,'&quot;'); }
-function renderValues(){
-  const host=document.getElementById('valuesList');
+function renderList(listKey){
+  const isImage = listKey==='image';
+  const host = document.getElementById(isImage?'imageValues':'colorValues');
+  const arr  = isImage ? state.imageValues : state.colorValues;
   host.innerHTML='';
-  state.values.forEach((v,i)=>{
+  arr.forEach((v,i)=>{
     const row=document.createElement('div'); row.className='value-row';
-    let inputHtml='';
-    const showColor = state.mode==='color' || (state.mode==='both' && v.type==='color');
-    const showImage = state.mode==='image' || (state.mode==='both' && v.type==='image');
-    const typeSel = state.mode==='both'
-      ? '<select class="vtype" data-k="type"><option value="color"'+(v.type==='color'?' selected':'')+'>Color</option><option value="image"'+(v.type==='image'?' selected':'')+'>Image</option></select>'
-      : '';
-    if(showColor){
-      inputHtml = '<div class="vinput"><input type="color" data-k="hex" value="'+(/^#([0-9a-f]{6})$/i.test(v.hex)?v.hex:'#cccccc')+'"><input type="text" class="vhex" data-k="hexText" value="'+escAttr(v.hex)+'" placeholder="#000000"></div>';
-    } else if(showImage){
-      inputHtml = '<div class="vinput"><input type="url" data-k="image" value="'+escAttr(v.image)+'" placeholder="https://image-url.jpg" style="flex:1;"></div>';
-    }
+    const inputHtml = isImage
+      ? '<div class="vinput"><input type="url" data-k="image" value="'+escAttr(v.image)+'" placeholder="https://image-url.jpg" style="flex:1;"></div>'
+      : '<div class="vinput"><input type="color" data-k="hex" value="'+(/^#([0-9a-f]{6})$/i.test(v.hex)?v.hex:'#cccccc')+'"><input type="text" class="vhex" data-k="hexText" value="'+escAttr(v.hex)+'" placeholder="#000000"></div>';
     row.innerHTML =
       '<div class="value-row-top">'+
-        '<input type="text" class="vname" data-k="name" value="'+escAttr(v.name)+'" placeholder="Value name (e.g. Navy)">'+
-        typeSel +
+        '<input type="text" class="vname" data-k="name" value="'+escAttr(v.name)+'" placeholder="Value name (e.g. '+(isImage?'Small':'Navy')+')">'+
         '<button class="del" title="Remove">&times;</button>'+
       '</div>'+ inputHtml;
 
     row.querySelectorAll('[data-k]').forEach(inp=>{
       inp.addEventListener('input',()=>{
         const k=inp.dataset.k;
-        if(k==='hexText'){ state.values[i].hex=inp.value; }
-        else if(k==='hex'){ state.values[i].hex=inp.value; }
-        else { state.values[i][k]=inp.value; }
-        if(k==='type'){ renderValues(); }
+        if(k==='hexText'||k==='hex') arr[i].hex=inp.value;
+        else arr[i][k]=inp.value;
         render();
       });
     });
-    row.querySelector('.del').addEventListener('click',()=>{ state.values.splice(i,1); renderValues(); render(); });
+    row.querySelector('.del').addEventListener('click',()=>{ arr.splice(i,1); renderList(listKey); render(); });
     host.appendChild(row);
   });
 }
-document.getElementById('addValue').addEventListener('click',()=>{
-  state.values.push({name:'',type:'color',hex:'#cccccc',image:''}); renderValues(); render();
+function renderValues(){ renderList('color'); renderList('image'); }
+document.querySelectorAll('.add-value-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const list=btn.dataset.list;
+    if(list==='image') state.imageValues.push({name:'',image:''});
+    else state.colorValues.push({name:'',hex:'#cccccc'});
+    renderList(list); render();
+  });
 });
 
-/* ---- preview helpers ---- */
-function valueAppearance(v){
-  const isImg = state.mode==='image' || (state.mode==='both' && v.type==='image');
-  if(isImg) return v.image ? {image:v.image} : null;
+/* ---- preview ---- */
+function activeBlocks(){
+  const b=[];
+  if(state.mode==='color' || state.mode==='both') b.push({option:state.colorOption, kind:'color', values:state.colorValues});
+  if(state.mode==='image' || state.mode==='both') b.push({option:state.imageOption, kind:'image', values:state.imageValues});
+  return b;
+}
+function blockAppearance(block,v){
+  if(block.kind==='image') return v.image ? {image:v.image} : null;
   return v.hex ? {hex:v.hex} : null;
 }
-function swatchBg(a){ if(!a)return null; return a.image ? 'url("'+a.image+'")' : a.hex; }
 function demoImage(a){
   if(a && a.image) return 'url("'+a.image+'")';
   const c=(a&&a.hex)||'#cccccc';
   return 'linear-gradient(135deg,'+c+' 0%, rgba(255,255,255,.4) 130%)';
 }
-function buildSwatchRow(host, imgEl, gridMode){
-  host.className='sdl-swatches '+(gridMode?'sdl-swatches--grid ':'')+'sdl-shape-'+state.shape;
-  host.style.setProperty('--sdl-swatch-size', state.size+'px');
-  host.style.setProperty('--sdl-swatch-gap', state.gap+'px');
-  host.style.setProperty('--sdl-active-bw', state.activeBorderWidth+'px');
-  host.style.setProperty('--sdl-active-bc', state.activeBorderColor);
-  host.style.setProperty('--sdl-active-radius', state.activeRadius+'px');
-  host.innerHTML='';
-  state.values.forEach((v,idx)=>{
-    const a=valueAppearance(v);
+function buildSwatchRowEl(rowEl, block, imgEl, labelEl){
+  rowEl.className='sdl-swatches sdl-shape-'+state.shape;
+  rowEl.style.setProperty('--sdl-swatch-size', state.size+'px');
+  rowEl.style.setProperty('--sdl-swatch-gap', state.gap+'px');
+  rowEl.style.setProperty('--sdl-active-bw', state.activeBorderWidth+'px');
+  rowEl.style.setProperty('--sdl-active-bc', state.activeBorderColor);
+  rowEl.style.setProperty('--sdl-active-radius', state.activeRadius+'px');
+  rowEl.innerHTML='';
+  block.values.forEach((v,idx)=>{
+    const a=blockAppearance(block,v);
     const b=document.createElement('button'); b.className='sdl-swatch'+(idx===0?' is-active':''); b.title=v.name;
-    const bg=swatchBg(a);
-    if(a&&a.image) b.style.backgroundImage=bg;
-    else if(bg) b.style.backgroundColor=bg;
+    if(a&&a.image) b.style.backgroundImage='url("'+a.image+'")';
+    else if(a&&a.hex) b.style.backgroundColor=a.hex;
     else { b.classList.add('sdl-swatch--unset'); b.textContent=(v.name||'?').charAt(0).toUpperCase(); }
     const setImg=()=>{ imgEl.style.background=demoImage(a); imgEl.style.backgroundSize='cover'; imgEl.style.backgroundPosition='center';
-      if(!gridMode) document.getElementById('pvActiveLabel').textContent = state.showLabel ? v.name : ''; };
+      if(labelEl) labelEl.textContent = state.showLabel ? v.name : ''; };
     if(state.trigger==='hover') b.addEventListener('mouseenter',setImg);
-    b.addEventListener('click',()=>{ host.querySelectorAll('.sdl-swatch').forEach(x=>x.classList.remove('is-active')); b.classList.add('is-active'); setImg(); });
-    host.appendChild(b);
+    b.addEventListener('click',()=>{ rowEl.querySelectorAll('.sdl-swatch').forEach(x=>x.classList.remove('is-active')); b.classList.add('is-active'); setImg(); });
+    rowEl.appendChild(b);
   });
-  const first=state.values[0]?valueAppearance(state.values[0]):null;
-  imgEl.style.background=demoImage(first); imgEl.style.backgroundSize='cover'; imgEl.style.backgroundPosition='center';
+}
+function buildPreview(host, imgEl, withTitles){
+  host.innerHTML='';
+  const blocks=activeBlocks();
+  blocks.forEach(block=>{
+    let labelEl=null;
+    if(withTitles || blocks.length>1){
+      const t=document.createElement('div'); t.className='pv-opt-title';
+      t.textContent=block.option || (block.kind==='image'?'Option':'Color');
+      if(withTitles){ labelEl=document.createElement('span'); labelEl.className='active-label'; t.appendChild(labelEl); }
+      host.appendChild(t);
+    }
+    const wrap=document.createElement('div'); wrap.className='pv-swatch-block';
+    const row=document.createElement('div'); buildSwatchRowEl(row, block, imgEl, labelEl);
+    wrap.appendChild(row); host.appendChild(wrap);
+  });
+  const fb=blocks[0];
+  if(fb && fb.values[0]){
+    const a=blockAppearance(fb, fb.values[0]);
+    imgEl.style.background=demoImage(a); imgEl.style.backgroundSize='cover'; imgEl.style.backgroundPosition='center';
+  }
 }
 
 /* ---- render ---- */
 function render(){
-  document.getElementById('pvOptName').textContent = state.swatchOption || 'Color';
-  document.getElementById('pvActiveLabel').textContent = state.showLabel && state.values[0] ? state.values[0].name : '';
-
+  applyMode();
   const gridSw=document.getElementById('pvGridSwatches');
-  if(state.applyToGrid) buildSwatchRow(gridSw, document.getElementById('pvGridImg'), true);
+  if(state.applyToGrid) buildPreview(gridSw, document.getElementById('pvGridImg'), false);
   else gridSw.innerHTML='';
-
   const pdpSw=document.getElementById('pvPdpSwatches');
-  if(state.applyToProduct) buildSwatchRow(pdpSw, document.getElementById('pvPdpImg'), false);
+  if(state.applyToProduct) buildPreview(pdpSw, document.getElementById('pvPdpImg'), true);
   else pdpSw.innerHTML='';
-
   document.getElementById('codeOutput').innerHTML = highlight(generateCode());
 }
 
 /* ---- code ---- */
-function buildColors(){
-  const colors={};
-  state.values.forEach(v=>{
-    if(!v.name) return;
-    const isImg = state.mode==='image' || (state.mode==='both' && v.type==='image');
-    colors[v.name] = isImg ? { image: v.image } : { hex: v.hex };
-  });
-  return colors;
+function blockValuesObj(block){
+  const o={};
+  block.values.forEach(v=>{ if(!v.name) return; o[v.name] = block.kind==='image' ? { image:v.image } : { hex:v.hex }; });
+  return o;
 }
 function generateCode(){
+  const swatchOptions = activeBlocks().map(b=>({ option:b.option, type:b.kind, values:blockValuesObj(b) }));
   const cfg={
-    swatchOption: state.swatchOption,
+    swatchOptions: swatchOptions,
     trigger: state.trigger,
     shape: state.shape,
     size: state.size,
@@ -541,8 +585,7 @@ function generateCode(){
     showLabel: state.showLabel,
     activeBorderWidth: state.activeBorderWidth,
     activeBorderColor: state.activeBorderColor,
-    activeRadius: state.activeRadius,
-    colors: buildColors()
+    activeRadius: state.activeRadius
   };
   return '<link rel="stylesheet" href="'+CDN_BASE+'/swatches.css">\n'+
     '<script>\n'+
