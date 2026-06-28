@@ -11,8 +11,10 @@
   margin: 0.6em 0 0;
 }
 
+/* Grid: one tidy line directly under the price. */
 .sdl-swatches--grid {
   margin-top: 0.5em;
+  flex-wrap: nowrap;
 }
 
 .sdl-swatches--product {
@@ -54,7 +56,8 @@
 }
 
 .sdl-swatch.is-active {
-  box-shadow: 0 0 0 2px #111;
+  box-shadow: 0 0 0 var(--sdl-active-bw, 2px) var(--sdl-active-bc, #111);
+  border-radius: var(--sdl-active-radius, 50%);
 }
 
 /* Unconfigured value — make it obvious it needs a hex/image. */
@@ -77,9 +80,10 @@
   margin-left: 0.4em;
 }
 
-/* Hide only the native <select> for the swatch option (the option title and
-   the swatches stay visible). */
-select.sdl-native-hidden {
+/* Hide the native dropdown for the swatch option — on the PDP this is the
+   whole .variant-select-wrapper (border + chevron), on the grid the whole
+   .variant-option block. The option title and the swatches stay visible. */
+.sdl-native-hidden {
   display: none !important;
 }
 
