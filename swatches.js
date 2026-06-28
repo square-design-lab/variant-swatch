@@ -159,6 +159,14 @@
     if (btn) btn.classList.add('is-active');
   }
 
+  // Hide a native control. Some themes set `display` with !important at a
+  // higher specificity than our class, so we also force it inline.
+  function hideNative(el) {
+    if (!el) return;
+    el.classList.add('sdl-native-hidden');
+    el.style.setProperty('display', 'none', 'important');
+  }
+
   const hoverEnabled = CONFIG.trigger === 'hover' || CONFIG.trigger === 'both';
 
   /* ------------------------------------------------------------------ */
@@ -260,7 +268,7 @@
         const gridSelect = tile.querySelector(
           '.product-list-item-add-to-cart select[name="variant-option-' + CONFIG.swatchOption + '-select"]');
         const gridOptionWrap = gridSelect && gridSelect.closest('.variant-option');
-        if (gridOptionWrap) gridOptionWrap.classList.add('sdl-native-hidden');
+        if (gridOptionWrap) hideNative(gridOptionWrap);
       }
 
       tile.dataset.sdlSwatch = 'true';
@@ -366,7 +374,7 @@
     // hide that entire wrapper.
     const dropdownWrap = select.closest('.variant-select-wrapper') || select.parentElement;
     dropdownWrap.parentElement.insertBefore(container, dropdownWrap);
-    if (CONFIG.hideNativeSelect) dropdownWrap.classList.add('sdl-native-hidden');
+    if (CONFIG.hideNativeSelect) hideNative(dropdownWrap);
 
     detail.dataset.sdlSwatch = 'true';
   }
